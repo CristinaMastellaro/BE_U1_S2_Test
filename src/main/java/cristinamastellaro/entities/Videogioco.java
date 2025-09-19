@@ -20,7 +20,7 @@ public class Videogioco extends Gioco {
         this.genre = genre;
     }
 
-    public Videogioco(String title, int publishedYear, double price, String platform, int duration, Genere genre, int id) {
+    public Videogioco(String title, int publishedYear, double price, String platform, int duration, Genere genre, long id) {
         this(title, publishedYear, price, platform, duration, genre);
         this.id = id;
     }

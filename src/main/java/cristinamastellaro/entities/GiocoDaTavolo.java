@@ -18,7 +18,7 @@ public class GiocoDaTavolo extends Gioco {
         }
     }
 
-    public GiocoDaTavolo(String title, int publishedYear, double price, int numPlayers, int duration, int id) {
+    public GiocoDaTavolo(String title, int publishedYear, double price, int numPlayers, int duration, long id) {
         this(title, publishedYear, price, numPlayers, duration);
         this.id = id;
     }
