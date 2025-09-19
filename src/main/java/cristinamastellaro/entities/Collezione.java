@@ -1,60 +1,149 @@
 package cristinamastellaro.entities;
 
-public abstract class Collezione {
-    protected final long id;
-    protected String title;
-    protected int publishedYear;
-    protected double price;
-    protected static int numGamesCreated = 0;
+import com.github.javafaker.Faker;
 
-    public Collezione(String title, int publishedYear, double price) {
-        numGamesCreated++;
-        this.id = 1000000000L + numGamesCreated;
-        try {
-            this.title = title;
-            if (publishedYear > 0) this.publishedYear = publishedYear;
-            else System.err.println("Anno non valido");
-            if (price > 0) this.price = price;
-            else throw new Exception("Prezzo non valido");
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class Collezione {
+    public Random rdm = new Random();
+    public Faker createFakeNames = new Faker();
+    private List<Gioco> games = new ArrayList<>();
+    private int numVideogames = 0;
+    private int numTableGames = 0;
+
+    public Collezione() {
+        games = new ArrayList<>();
+    }
+
+    public Collezione(int n) {
+        List<String> platforms = Arrays.asList("PS5", "Switch", "XBOX", "PC", "Wii", "NintendoDS", "Nintendo3DS");
+        for (int i = 0; i < n; i++) {
+            if (i % 2 == 0) {
+                games.add(new Videogioco(
+                        createFakeNames.name().title(),
+                        rdm.nextInt(1980, 2025),
+                        Math.floor(rdm.nextDouble(5, 300) * 100) / 100,
+                        platforms.get(rdm.nextInt(7)),
+                        rdm.nextInt(1, 100),
+                        Genere.randomGenre()
+                ));
+                numVideogames++;
+            } else {
+                games.add(new GiocoDaTavolo(
+                        createFakeNames.name().title(),
+                        rdm.nextInt(1980, 2025),
+                        Math.floor(rdm.nextDouble(5, 300) * 100) / 100,
+                        rdm.nextInt(2, 11),
+                        rdm.nextInt(5, 180)
+                ));
+                numTableGames++;
+            }
         }
     }
 
     // Getters and setters
-
-    public long getId() {
-        return id;
+    public List<Gioco> getGames() {
+        return games;
     }
 
-    public String getTitle() {
-        return title;
+    public void addGame(Gioco game) {
+        if (games.stream().anyMatch(alreadyPresentGame -> alreadyPresentGame.id == game.id)) {
+            System.err.println("Non è possibile aggiungere il gioco con id " + game.id + ", perché nella lista è già presente un altro con lo stesso id");
+        } else {
+            games.add(game);
+            System.out.println(game.getTitle() + " aggiunto alla lista!");
+        }
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void addListGame(List<Gioco> list) {
+        for (Gioco gioco : list) {
+            addGame(gioco);
+        }
     }
 
-    public int getPublishedYear() {
-        return publishedYear;
+    // Altri metodi
+    public Gioco searchById(int id) {
+        // Dato che dovrebbe esserci un unico gioco con quell'id, andrà benissimo prendere il primo elemento della lista
+        try {
+            return games.stream().filter(game -> game.getId() == id).toList().getFirst();
+        } catch (Exception e) {
+            System.err.println("Nessuno gioco corrisponde all'id fornito");
+            return null;
+        }
     }
 
-    public void setPublishedYear(int publishedYear) {
-        this.publishedYear = publishedYear;
+    public List<Gioco> searchByPrice(double maxPrice) {
+        List<Gioco> searchedGames = games.stream().filter(game -> game.getPrice() < maxPrice).toList();
+        if (!searchedGames.isEmpty()) return searchedGames;
+        else {
+            System.out.println("Nessun gioco costa meno di " + maxPrice + "€");
+            return null;
+        }
     }
 
-    public double getPrice() {
-        return price;
+    public Map<Integer, List<Gioco>> searchByNumPlayer() {
+        try {
+            if (games.isEmpty()) throw new Exception("Non ci sono giochi nella tua collezione");
+            return games.stream().filter(game -> game instanceof GiocoDaTavolo).collect(Collectors.groupingBy(game -> ((GiocoDaTavolo) game).getNumPlayers()));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public List<Gioco> searchByNumPlayers(int howManyPlayers) {
+        List<Gioco> searchedGames = games.stream().filter(game -> game instanceof GiocoDaTavolo).filter(game -> ((GiocoDaTavolo) game).getNumPlayers() == howManyPlayers).toList();
+        if (!searchedGames.isEmpty()) return searchedGames;
+        else {
+            System.out.println("Nessun gioco accetta " + howManyPlayers + " giocatori");
+            return null;
+        }
     }
 
-    public static int getNumGamesCreated() {
-        return numGamesCreated;
+    public void removeById(int id) {
+        if (games.removeIf(game -> game.getId() == id)) System.out.println("Gioco cancellato!");
+        else System.out.println("Gioco non trovato");
     }
 
-    public static void setNumGamesCreated(int numGamesCreated) {
-        Collezione.numGamesCreated = numGamesCreated;
+    public void updateGameById(int id, Gioco updatedGame) {
+        Gioco searchedGame = searchById(id);
+        int index = games.indexOf(searchedGame);
+        games.set(index, updatedGame);
+        System.out.println("Gioco aggiornato!");
+    }
+
+    public Gioco searchMostExpensiveGame() {
+        List<Gioco> searchedGames = games.stream().sorted(Comparator.comparingDouble(Gioco::getPrice).reversed()).limit(1).toList();
+        if (!searchedGames.isEmpty()) return searchedGames.getFirst();
+        else {
+            System.out.println("La lista è vuota");
+            return null;
+        }
+    }
+
+    public double averageSpent() {
+        try {
+            if (games.isEmpty()) throw new Exception("La collezione di giochi è vuota");
+            return games.stream().collect(Collectors.averagingDouble(Gioco::getPrice));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return 0;
+        }
+    }
+
+    public void collectionsStatistics() {
+        System.out.println("Nella tua collezione di giochi hai un totale di " + (numTableGames + numVideogames) + " giochi, di cui " + numTableGames + " sono da tavolo e " + numVideogames + " sono videogiochi.");
+        System.out.println("Il gioco con il prezzo più alto è: " + searchMostExpensiveGame().getTitle() + ", con un prezzo di " + searchMostExpensiveGame().getPrice() + "€");
+        System.out.println("La media di soldi spesi in giochi è di " + averageSpent() + "€");
+    }
+
+    @Override
+    public String toString() {
+        List<String> myGames = new ArrayList<>();
+        for (Gioco game : games) {
+            myGames.add(game.toString());
+        }
+        return "La tua collezione di giochi include:\n" + String.join("", myGames);
     }
 }
-
