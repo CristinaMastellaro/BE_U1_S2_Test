@@ -184,7 +184,7 @@ public class Application {
                                         String priceS = s.nextLine();
                                         double secondPrice;
                                         if (priceS.trim().isEmpty()) secondPrice = game.getPrice();
-                                        secondPrice = Double.parseDouble(priceS);
+                                        else secondPrice = Double.parseDouble(priceS);
 
                                         System.out.println("Numero di giocatori:");
                                         String numPlayerS = s.nextLine();
