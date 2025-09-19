@@ -19,7 +19,7 @@ public class CollezioneDiGiochi {
     public CollezioneDiGiochi(int n) {
         List<String> platforms = Arrays.asList("PS5", "Switch", "XBOX", "PC", "Wii", "NintendoDS", "Nintendo3DS");
         for (int i = 0; i < n; i++) {
-            if (i % 2 == 0) {
+            if (createFakeNames.bool().bool()) {
                 games.add(new Videogioco(
                         createFakeNames.book().title(),
                         rdm.nextInt(1980, 2025),
@@ -43,6 +43,22 @@ public class CollezioneDiGiochi {
     }
 
     // Getters and setters
+    public int getNumVideogames() {
+        return numVideogames;
+    }
+
+    public void setNumVideogames(int numVideogames) {
+        this.numVideogames = numVideogames;
+    }
+
+    public int getNumTableGames() {
+        return numTableGames;
+    }
+
+    public void setNumTableGames(int numTableGames) {
+        this.numTableGames = numTableGames;
+    }
+
     public List<Gioco> getGames() {
         return games;
     }
@@ -59,6 +75,8 @@ public class CollezioneDiGiochi {
     public void addListGame(List<Gioco> list) {
         for (Gioco gioco : list) {
             addGame(gioco);
+            if (gioco instanceof Videogioco) numVideogames++;
+            else numTableGames++;
         }
     }
 
@@ -78,8 +96,12 @@ public class CollezioneDiGiochi {
     public List<Gioco> searchByPrice(double maxPrice) {
         List<Gioco> searchedGames = games.stream().filter(game -> game.getPrice() < maxPrice).toList();
         if (!searchedGames.isEmpty()) {
-            System.out.println("Ecco i giochi con il prezzo inferiore a " + maxPrice + "€");
-            System.out.println(searchedGames + "\n");
+            System.out.println("Ecco i giochi con il prezzo inferiore a " + maxPrice + "€:");
+            String allGames = "";
+            for (Gioco game : searchedGames) {
+                allGames += game;
+            }
+            System.out.println(allGames);
             return searchedGames;
         } else {
             System.out.println("Nessun gioco costa meno di " + maxPrice + "€\n");

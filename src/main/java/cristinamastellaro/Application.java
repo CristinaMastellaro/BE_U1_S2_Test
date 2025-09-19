@@ -11,12 +11,12 @@ public class Application {
 
     public static void main(String[] args) {
 
-        System.out.println("Ciao! Vuoi creare la tua lista giocatori o ti va bene una lista precompilata? (y/n)");
+        System.out.println("Ciao! Vuoi creare la tua lista giocatori? (y/n)");
         String firstResponse = s.nextLine();
         CollezioneDiGiochi myGames = new CollezioneDiGiochi();
         if (!firstResponse.equalsIgnoreCase("y")) {
             while (true) {
-                System.out.println("Scrivi quanti giochi vuoi nella tua lista");
+                System.out.println("Scrivi quanti giochi vuoi che vengano aggiunti automaticamente nella tua lista");
                 try {
                     String numGamesS = s.nextLine();
                     int numGames = Integer.parseInt(numGamesS);
@@ -32,10 +32,10 @@ public class Application {
                 String firstChoice = s.nextLine();
                 try {
                     if (firstChoice.equals("1")) {
-                        Gioco game = creaVideogioco();
+                        Gioco game = creaVideogioco(myGames);
                         myGames.addGame(game);
                     } else if (firstChoice.equals("2")) {
-                        Gioco game = creaGiocoDaTavolo();
+                        Gioco game = creaGiocoDaTavolo(myGames);
                         myGames.addGame(game);
                     } else throw new Exception("Numero digitato non valido, riprovare");
                     break;
@@ -46,23 +46,22 @@ public class Application {
         }
         System.out.println(myGames);
 
-        myLoop:
         while (true) {
-            System.out.println("Cosa vuoi fare con questa lista di giochi?");
-            System.out.println("1 - Aggiungere un gioco");
-            System.out.println("2 - Aggiungere giochi casuali");
-            System.out.println("3 - Ricerca un gioco attraverso il suo id");
-            System.out.println("4 - Ricercare la lista di giochi con un prezzo inferiore a un numero dato");
-            System.out.println("5 - Ricercare dei giochi per numero di giocatori (se non inserisci il numero, vedrai tutti i giochi divisi per numero di giocatore)");
-            System.out.println("6 - Rimuovere un elemento dando l'id");
-            System.out.println("7 - Modificare un elemento esistente dando l'id");
-            System.out.println("8 - Vedere le statistiche della collezione");
-            System.out.println("9 - Guarda la tua collezione");
-            System.out.println("Per uscire, digita 'quit'");
-
             try {
+                System.out.println("Cosa vuoi fare con questa lista di giochi?");
+                System.out.println("1 - Aggiungere un gioco");
+                System.out.println("2 - Aggiungere giochi casuali");
+                System.out.println("3 - Ricercare un gioco attraverso il suo id");
+                System.out.println("4 - Ricercare la lista di giochi con un prezzo inferiore a un numero dato");
+                System.out.println("5 - Ricercare dei giochi per numero di giocatori (se non inserisci il numero, vedrai tutti i giochi divisi per numero di giocatore)");
+                System.out.println("6 - Rimuovere un elemento dando l'id");
+                System.out.println("7 - Modificare un elemento esistente dando l'id");
+                System.out.println("8 - Vedere le statistiche della collezione");
+                System.out.println("9 - Guardare la tua collezione");
+                System.out.println("Per uscire, digita 'quit'");
+
                 String choice = s.nextLine();
-                if (choice.equalsIgnoreCase("quit")) break myLoop;
+                if (choice.equalsIgnoreCase("quit")) break;
                 int chosenNum = Integer.parseInt(choice);
                 switch (chosenNum) {
                     case 1:
@@ -72,12 +71,12 @@ public class Application {
                                 int typeOfGame = Integer.parseInt(s.nextLine());
                                 switch (typeOfGame) {
                                     case 1:
-                                        Gioco game = creaVideogioco();
+                                        Gioco game = creaVideogioco(myGames);
                                         myGames.addGame(game);
                                         break;
 
                                     case 2:
-                                        Gioco secondGame = creaGiocoDaTavolo();
+                                        Gioco secondGame = creaGiocoDaTavolo(myGames);
                                         myGames.addGame(secondGame);
                                         break;
                                     default:
@@ -92,8 +91,8 @@ public class Application {
                         break;
                     case 2:
                         while (true) {
-                            System.out.println("Quanti giochi vuoi aggiungere?");
                             try {
+                                System.out.println("Quanti giochi vuoi aggiungere?");
                                 String numS = s.nextLine();
                                 int num = Integer.parseInt(numS);
                                 CollezioneDiGiochi newGames = new CollezioneDiGiochi(num);
@@ -105,6 +104,7 @@ public class Application {
                                 System.err.println(e.getMessage());
                             }
                         }
+                        break;
                     case 3:
                         while (true) {
                             try {
@@ -266,8 +266,10 @@ public class Application {
                         break;
                     case 8:
                         myGames.collectionsStatistics();
+                        break;
                     case 9:
-                        System.out.println(myGames.toString());
+                        System.out.println(myGames);
+                        break;
                     default:
                         System.out.println("Numero selezionato non valido, riprova");
                 }
@@ -278,7 +280,7 @@ public class Application {
         s.close();
     }
 
-    public static Gioco creaVideogioco() {
+    public static Gioco creaVideogioco(CollezioneDiGiochi totalGames) {
         System.out.println("Titolo:");
         String title = s.nextLine();
         System.out.println("Anno di pubblicazione:");
@@ -310,10 +312,11 @@ public class Application {
             case "6" -> Genere.Rhythm;
             default -> Genere.RPG;
         };
+        totalGames.setNumVideogames(totalGames.getNumVideogames() + 1);
         return new Videogioco(title, year, price, platform, duration, genre);
     }
 
-    public static Gioco creaGiocoDaTavolo() {
+    public static Gioco creaGiocoDaTavolo(CollezioneDiGiochi totalGames) {
         System.out.println("Titolo:");
         String secondTitle = s.nextLine();
         System.out.println("Anno di pubblicazione:");
@@ -328,6 +331,7 @@ public class Application {
         System.out.println("Quanto dura, in genere, in minuti?");
         String secondDurationS = s.next();
         int secondDuration = Integer.parseInt(secondDurationS);
+        totalGames.setNumTableGames(totalGames.getNumTableGames() + 1);
         return new GiocoDaTavolo(secondTitle, secondYear, secondPrice, numPlayer, secondDuration);
     }
 }
