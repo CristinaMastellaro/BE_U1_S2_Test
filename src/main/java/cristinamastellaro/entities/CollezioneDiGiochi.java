@@ -5,23 +5,23 @@ import com.github.javafaker.Faker;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Collezione {
+public class CollezioneDiGiochi {
     public Random rdm = new Random();
     public Faker createFakeNames = new Faker();
     private List<Gioco> games = new ArrayList<>();
     private int numVideogames = 0;
     private int numTableGames = 0;
 
-    public Collezione() {
+    public CollezioneDiGiochi() {
         games = new ArrayList<>();
     }
 
-    public Collezione(int n) {
+    public CollezioneDiGiochi(int n) {
         List<String> platforms = Arrays.asList("PS5", "Switch", "XBOX", "PC", "Wii", "NintendoDS", "Nintendo3DS");
         for (int i = 0; i < n; i++) {
             if (i % 2 == 0) {
                 games.add(new Videogioco(
-                        createFakeNames.name().title(),
+                        createFakeNames.book().title(),
                         rdm.nextInt(1980, 2025),
                         Math.floor(rdm.nextDouble(5, 300) * 100) / 100,
                         platforms.get(rdm.nextInt(7)),
@@ -31,7 +31,7 @@ public class Collezione {
                 numVideogames++;
             } else {
                 games.add(new GiocoDaTavolo(
-                        createFakeNames.name().title(),
+                        createFakeNames.book().title(),
                         rdm.nextInt(1980, 2025),
                         Math.floor(rdm.nextDouble(5, 300) * 100) / 100,
                         rdm.nextInt(2, 11),
@@ -49,10 +49,10 @@ public class Collezione {
 
     public void addGame(Gioco game) {
         if (games.stream().anyMatch(alreadyPresentGame -> alreadyPresentGame.id == game.id)) {
-            System.err.println("Non è possibile aggiungere il gioco con id " + game.id + ", perché nella lista è già presente un altro con lo stesso id");
+            System.err.println("Non è possibile aggiungere il gioco con id " + game.id + ", perché nella lista è già presente un altro con lo stesso id\n");
         } else {
             games.add(game);
-            System.out.println(game.getTitle() + " aggiunto alla lista!");
+            System.out.println(game.getTitle() + " aggiunto alla lista!\n");
         }
     }
 
@@ -66,18 +66,23 @@ public class Collezione {
     public Gioco searchById(int id) {
         // Dato che dovrebbe esserci un unico gioco con quell'id, andrà benissimo prendere il primo elemento della lista
         try {
-            return games.stream().filter(game -> game.getId() == id).toList().getFirst();
+            Gioco searchedGame = games.stream().filter(game -> game.getId() == id).toList().getFirst();
+            System.out.println("Il gioco cercato è: " + searchedGame + "\n");
+            return searchedGame;
         } catch (Exception e) {
-            System.err.println("Nessuno gioco corrisponde all'id fornito");
+            System.err.println("Nessuno gioco corrisponde all'id fornito\n");
             return null;
         }
     }
 
     public List<Gioco> searchByPrice(double maxPrice) {
         List<Gioco> searchedGames = games.stream().filter(game -> game.getPrice() < maxPrice).toList();
-        if (!searchedGames.isEmpty()) return searchedGames;
-        else {
-            System.out.println("Nessun gioco costa meno di " + maxPrice + "€");
+        if (!searchedGames.isEmpty()) {
+            System.out.println("Ecco i giochi con il prezzo inferiore a " + maxPrice + "€");
+            System.out.println(searchedGames + "\n");
+            return searchedGames;
+        } else {
+            System.out.println("Nessun gioco costa meno di " + maxPrice + "€\n");
             return null;
         }
     }
@@ -85,32 +90,50 @@ public class Collezione {
     public Map<Integer, List<Gioco>> searchByNumPlayer() {
         try {
             if (games.isEmpty()) throw new Exception("Non ci sono giochi nella tua collezione");
-            return games.stream().filter(game -> game instanceof GiocoDaTavolo).collect(Collectors.groupingBy(game -> ((GiocoDaTavolo) game).getNumPlayers()));
+            Map<Integer, List<Gioco>> gameMap = games.stream().filter(game -> game instanceof GiocoDaTavolo).collect(Collectors.groupingBy(game -> ((GiocoDaTavolo) game).getNumPlayers()));
+            System.out.println("Ecco la lista di giochi diviso in base al numero di giocatori");
+            System.out.println(gameMap + "\n");
+            return gameMap;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println(e.getMessage() + "\n");
             return null;
         }
     }
 
     public List<Gioco> searchByNumPlayers(int howManyPlayers) {
-        List<Gioco> searchedGames = games.stream().filter(game -> game instanceof GiocoDaTavolo).filter(game -> ((GiocoDaTavolo) game).getNumPlayers() == howManyPlayers).toList();
-        if (!searchedGames.isEmpty()) return searchedGames;
-        else {
-            System.out.println("Nessun gioco accetta " + howManyPlayers + " giocatori");
+        try {
+            if (howManyPlayers < 2 || howManyPlayers > 10)
+                throw new Exception("Numero di giocatori inserito non valido");
+            List<Gioco> searchedGames = games.stream().filter(game -> game instanceof GiocoDaTavolo).filter(game -> ((GiocoDaTavolo) game).getNumPlayers() == howManyPlayers).toList();
+            if (!searchedGames.isEmpty()) {
+                System.out.println("Ecco i giochi con " + howManyPlayers + " giocatori:");
+                searchedGames.forEach(System.out::println);
+                System.out.println("\n");
+                return searchedGames;
+            } else {
+                System.out.println("Nessun gioco accetta " + howManyPlayers + " giocatori\n");
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
             return null;
         }
     }
 
     public void removeById(int id) {
-        if (games.removeIf(game -> game.getId() == id)) System.out.println("Gioco cancellato!");
-        else System.out.println("Gioco non trovato");
+        if (games.removeIf(game -> game.getId() == id)) System.out.println("Gioco cancellato!\n");
+        else System.out.println("Gioco non trovato\n");
     }
 
     public void updateGameById(int id, Gioco updatedGame) {
         Gioco searchedGame = searchById(id);
-        int index = games.indexOf(searchedGame);
-        games.set(index, updatedGame);
-        System.out.println("Gioco aggiornato!");
+        try {
+            int index = games.indexOf(searchedGame);
+            games.set(index, updatedGame);
+            System.out.println("Gioco aggiornato!\n");
+        } catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
+        }
     }
 
     public Gioco searchMostExpensiveGame() {
@@ -135,7 +158,7 @@ public class Collezione {
     public void collectionsStatistics() {
         System.out.println("Nella tua collezione di giochi hai un totale di " + (numTableGames + numVideogames) + " giochi, di cui " + numTableGames + " sono da tavolo e " + numVideogames + " sono videogiochi.");
         System.out.println("Il gioco con il prezzo più alto è: " + searchMostExpensiveGame().getTitle() + ", con un prezzo di " + searchMostExpensiveGame().getPrice() + "€");
-        System.out.println("La media di soldi spesi in giochi è di " + averageSpent() + "€");
+        System.out.println("La media di soldi spesi in giochi è di " + Math.floor(averageSpent() * 100) / 100 + "€\n");
     }
 
     @Override

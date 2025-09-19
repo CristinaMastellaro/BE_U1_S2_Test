@@ -18,6 +18,10 @@ public class GiocoDaTavolo extends Gioco {
         }
     }
 
+    public GiocoDaTavolo(String title, int publishedYear, double price, int numPlayers, int duration, int id) {
+        this(title, publishedYear, price, numPlayers, duration);
+        this.id = id;
+    }
     // Getters and setters
 
     public int getNumPlayers() {

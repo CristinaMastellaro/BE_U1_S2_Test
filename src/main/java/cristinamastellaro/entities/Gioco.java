@@ -2,15 +2,16 @@ package cristinamastellaro.entities;
 
 import com.github.javafaker.Faker;
 
+import java.time.LocalDate;
 import java.util.Random;
 import java.util.Scanner;
 
 public abstract class Gioco {
     protected static int numGamesCreated = 0;
-    protected final long id;
     public Scanner scanner = new Scanner(System.in);
     public Random rdm = new Random();
     public Faker createFakeNames = new Faker();
+    protected long id;
     protected String title;
     protected int publishedYear;
     protected double price;
@@ -24,10 +25,10 @@ public abstract class Gioco {
                 System.err.println("Titolo non valido!");
                 this.title = createFakeNames.name().title();
             }
-            if (publishedYear > 0) this.publishedYear = publishedYear;
+            if (publishedYear > 0 && publishedYear < LocalDate.now().getYear()) this.publishedYear = publishedYear;
             else {
                 System.err.println("Anno non valido");
-                this.publishedYear = rdm.nextInt(1950, 2025);
+                this.publishedYear = rdm.nextInt(1800, LocalDate.now().getYear());
             }
             ;
             if (price > 0) this.price = price;
@@ -71,10 +72,10 @@ public abstract class Gioco {
     }
 
     public void setPublishedYear(int publishedYear) {
-        if (publishedYear > 0) this.publishedYear = publishedYear;
+        if (publishedYear > 0 && publishedYear < LocalDate.now().getYear()) this.publishedYear = publishedYear;
         else {
             System.err.println("Anno non valido");
-            this.publishedYear = rdm.nextInt(1980, 2025);
+            this.publishedYear = rdm.nextInt(1800, 2025);
         }
     }
 
